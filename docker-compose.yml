@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  # ClaimFlow AI Application
+  claimflow-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: claimflow-ai
+    ports:
+      - "7860:7860" # Gradio UI
+      - "8000:8000" # FastAPI (if used)
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - DATABASE_URL=sqlite:///data/claimflow.db
+      - LOG_LEVEL=INFO
+      - PYTHONPATH=/app
+    volumes:
+      # Persist database
+      - ./data:/app/data
+      # Persist ChromaDB vector store
+      - ./data/chroma_db:/app/data/chroma_db
+      # Persist logs
+      - ./logs:/app/logs
+      # Mount policy documents
+      - ./data/policies:/app/data/policies:ro
+    command: gradio
+    restart: unless-stopped
+    networks:
+      - claimflow-network
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:7860" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+  # Optional: FastAPI Backend Service (if running separately)
+  # claimflow-api:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   container_name: claimflow-api
+  #   ports:
+  #     - "8000:8000"
+  #   environment:
+  #     - OPENAI_API_KEY=${OPENAI_API_KEY}
+  #     - DATABASE_URL=sqlite:///data/claimflow.db
+  #   volumes:
+  #     - ./data:/app/data
+  #   command: api
+  #   restart: unless-stopped
+  #   networks:
+  #     - claimflow-network
+
+networks:
+  claimflow-network:
+    driver: bridge
+
+volumes:
+  claimflow-data:
+    driver: local
