@@ -1,12 +1,15 @@
 """
 Gradio Chat Interface for ClaimFlow AI
 Provides conversational UI for insurance claim submission
+
+Updated to use hybrid agent workflow.
 """
 import gradio as gr
 import logging
 import time
 from langchain_core.messages import HumanMessage
-from agent.workflow import graph
+from agent.workflow_agent import graph, get_reasoning_trace, get_processing_summary
+from agent.state import create_initial_state
 import config
 
 logging.config.dictConfig(config.LOGGING_CONFIG)
@@ -19,28 +22,20 @@ def chat(message: str, history: list, session_id: str = "default"):
     
     Args:
         message: User's message
-        history: Gradio chat history [[user_msg, bot_msg], ...]
+        history: Gradio chat history (list of {"role": str, "content": str} dicts) - Gradio 6.x format
         session_id: Session identifier for checkpointing
         
     Yields:
-        Updated history with bot responses
+        Updated history with bot responses in Gradio 6.x dict format
     """
     try:
         # Config for LangGraph checkpointing
         config_dict = {"configurable": {"thread_id": session_id}}
         
-        # For first message, initialize state
+        # For first message, initialize state using the new factory function
         if not history:
-            initial_state = {
-                "messages": [HumanMessage(content=message)],
-                "claim_data": {},
-                "missing_fields": [],
-                "conversation_complete": False,
-                "conversation_turn_count": 0,
-                "processing_step": "gathering",
-                "session_id": session_id,
-                "processing_start_time": time.time()
-            }
+            initial_state = create_initial_state(session_id)
+            initial_state["messages"] = [HumanMessage(content=message)]
             
             logger.info(f"Starting new conversation: {message[:50]}...")
             
@@ -81,13 +76,16 @@ def chat(message: str, history: list, session_id: str = "default"):
                     # AI message
                     new_messages.insert(0, msg.content)
         
-        # Yield bot responses progressively
-        current_history = history.copy()
+        # Build history in Gradio 6.x format (list of {"role": ..., "content": ...} dicts)
+        current_history = list(history) if history else []
+        
+        # Add user message first
+        current_history.append({"role": "user", "content": message})
         
         if new_messages:
             # For processing steps, yield them one by one with delay for visual effect
-            for i, bot_msg in enumerate(new_messages):
-                current_history.append([message if i == 0 else None, bot_msg])
+            for bot_msg in new_messages:
+                current_history.append({"role": "assistant", "content": bot_msg})
                 yield current_history
                 
                 # Small delay for step-by-step visualization during processing
@@ -95,14 +93,16 @@ def chat(message: str, history: list, session_id: str = "default"):
                     time.sleep(0.3)
         else:
             # Fallback if no response
-            current_history.append([message, "I'm processing your request..."])
+            current_history.append({"role": "assistant", "content": "I'm processing your request..."})
             yield current_history
         
     except Exception as e:
         logger.error(f"Error in chat: {e}", exc_info=True)
         error_msg = f"I apologize, but I encountered an error: {str(e)}\n\nPlease try again or rephrase your message."
-        history.append([message, error_msg])
-        yield history
+        current_history = list(history) if history else []
+        current_history.append({"role": "user", "content": message})
+        current_history.append({"role": "assistant", "content": error_msg})
+        yield current_history
 
 
 def create_ui():
@@ -152,8 +152,7 @@ def create_ui():
             height=500,
             placeholder="Start chatting by typing below...",
             label="Conversation",
-            show_label=True,
-            avatar_images=(None, "🤖")
+            show_label=True
         )
         
         with gr.Row():
@@ -206,7 +205,7 @@ def create_ui():
         def clear_chat():
             """Clear chat and start new session"""
             new_session = f"session_{int(time.time())}"
-            return [], new_session
+            return [], new_session  # Empty list works for both formats
         
         # Wire up events
         submit_btn.click(

@@ -1,24 +1,27 @@
-# 🤖 ClaimFlow AI Agent - Agentic Insurance Claims Processor
+# 🤖 ClaimFlow AI Agent - Hybrid Agentic Insurance Claims Processor
 
-> **Transform insurance claim processing with intelligent agentic AI** - A conversational AI system that autonomously processes insurance claims end-to-end through natural dialogue and multi-step reasoning.
+> **Transform insurance claim processing with intelligent agentic AI** - A hybrid conversational AI system that combines deterministic information gathering with autonomous agentic processing to handle insurance claims end-to-end through natural dialogue and intelligent reasoning.
 
 [![Live Demo](https://img.shields.io/badge/🚀_Live_Demo-Hugging_Face-yellow)](https://huggingface.co/spaces/abhireds/claimflow-ai)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![LangGraph](https://img.shields.io/badge/LangGraph-1.0+-green.svg)](https://github.com/langchain-ai/langgraph)
+[![LangGraph](https://img.shields.io/badge/LangGraph-2.0+-green.svg)](https://github.com/langchain-ai/langgraph)
 [![GPT-4o](https://img.shields.io/badge/GPT--4o-OpenAI-orange.svg)](https://openai.com)
+[![ChromaDB](https://img.shields.io/badge/ChromaDB-0.4+-purple.svg)](https://www.trychroma.com/)
 [![Tests](https://img.shields.io/badge/tests-31%2F31_passing-brightgreen.svg)](tests/)
 
 ---
 
 ## 🎯 What Is This?
 
-ClaimFlow AI is an **agentic AI system** that revolutionizes insurance claim processing by combining:
+ClaimFlow AI is a **hybrid agentic AI system** that revolutionizes insurance claim processing by combining:
 
-- 🗣️ **Natural Conversations** - Talk to the AI like a human agent
-- 🧠 **Autonomous Decision-Making** - AI independently processes claims through 9 intelligent steps
-- 📚 **RAG-Powered Intelligence** - Retrieves and reasons over policy documents
-- 🔍 **Fraud Detection** - Analyzes claim history and patterns
+- 🗣️ **Natural Conversations** - Deterministic conversational intake with smart question generation
+- 🤖 **Autonomous Agent Processing** - LangGraph-powered agent with 9 intelligent tools
+- 📚 **Dual-Database Architecture** - ChromaDB for RAG + SQLite for structured data
+- 🔧 **Dynamic Tool Orchestration** - Agent decides tool execution order based on dependencies
+- 🔍 **Fraud Detection** - Analyzes claim history and patterns from database
 - ⚡ **Real-Time Processing** - From conversation to approval in seconds
+- 🎯 **ReAct-Style Reasoning** - Agent thinks, acts, and observes in a loop
 
 **Try it live:** [https://huggingface.co/spaces/abhireds/claimflow-ai](https://huggingface.co/spaces/abhireds/claimflow-ai)
 
@@ -32,15 +35,20 @@ ClaimFlow AI is an **agentic AI system** that revolutionizes insurance claim pro
 - **Contextual Follow-ups** - Asks smart questions based on claim type
 - **Empathetic Responses** - Shows understanding and support
 
-### 🤖 Agentic AI Workflow
-- **9-Step Autonomous Processing** - AI agent independently executes complex workflow
-- **Dynamic Decision Making** - Adapts based on policy rules and claim data
-- **Multi-Tool Orchestration** - Coordinates RAG, database, calculations, and rules
-- **State Management** - Maintains context across conversation and processing
+### 🤖 Agentic AI Workflow (LangGraph)
+- **Hybrid Two-Phase Architecture** - Deterministic conversation → Agentic processing
+- **9 Specialized Tools** - LangChain @tool decorator with rich descriptions
+- **Dynamic Tool Selection** - Agent independently chooses which tools to call
+- **Dependency Management** - Tools validate prerequisites before execution
+- **Parallel Execution** - Independent tools run concurrently for speed
+- **State Management** - LangGraph StateGraph with message reducers
+- **Audit Trail** - Complete reasoning trace for explainability
 
 ### 🔒 Enterprise-Grade
-- **Vector Search (ChromaDB)** - Semantic policy document retrieval
-- **Relational Database (SQLite)** - Customer, policy, and claim persistence
+- **Vector Database (ChromaDB)** - Persistent semantic search with sentence-transformers
+- **Relational Database (SQLite + SQLAlchemy 2.0)** - ORM models with relationships
+- **Tool Validation** - Dependency checking and error handling
+- **Checkpointing** - MemorySaver for conversation state persistence
 - **Comprehensive Testing** - 31/31 tests passing (100% coverage on core)
 - **Docker Ready** - Containerized deployment with docker-compose
 
@@ -51,78 +59,138 @@ ClaimFlow AI is an **agentic AI system** that revolutionizes insurance claim pro
 
 ---
 
-## 🏗️ Architecture
+## 🏗️ Hybrid Architecture
 
 ```
-┌──────────────────────────────────────────────────────────────┐
-│                  Gradio Chat Interface                       │
-│              http://localhost:7865 (Local)                   │
-│      https://huggingface.co/spaces/abhireds/claimflow-ai    │
-└────────────────────────┬─────────────────────────────────────┘
-                         │
-                         ▼
-┌──────────────────────────────────────────────────────────────┐
-│           LangGraph Agentic AI Workflow (GPT-4o)             │
-│                                                              │
-│  📍 PHASE 1: CONVERSATIONAL INTELLIGENCE                    │
-│  ┌────────────────────────────────────────────────────┐    │
-│  │  1. Greeting Detection & Warm Welcome              │    │
-│  │  2. Claim Type Auto-Detection (Motor/Health/Home)  │    │
-│  │  3. Smart Contextual Follow-up Questions           │    │
-│  │  4. Information Completeness Validation            │    │
-│  └────────────────────────────────────────────────────┘    │
-│                         │                                    │
-│                         ▼                                    │
-│  🤖 PHASE 2: AUTONOMOUS 9-STEP PROCESSING                   │
-│  ┌────────────────────────────────────────────────────┐    │
-│  │  Step 1: Extract Structured Data from Conversation│    │
-│  │  Step 2: Retrieve Policy Documents (RAG) ────────┐│    │
-│  │  Step 3: Validate Coverage Eligibility           ││    │
-│  │  Step 4: Check Policy Exclusions                 ││    │
-│  │  Step 5: Calculate Claim Amount (Auto)           ││    │
-│  │  Step 6: Determine Required Documents            ││    │
-│  │  Step 7: Analyze Claim History (Fraud Check) ────┼┼─┐ │
-│  │  Step 8: Make Approval/Rejection Decision        ││ │ │
-│  │  Step 9: Generate Detailed Claim Report          ││ │ │
-│  └───────────────────────────────────────────────────┼┼─┼─┘
-└──────────────────────────────────────────────────────┼┼─┼──┘
-                                                       ││ │
-                    ┌──────────────────────────────────┘│ │
-                    │  ┌────────────────────────────────┘ │
-                    ▼  ▼                                   ▼
-         ┌─────────────────────┐           ┌────────────────────┐
-         │   ChromaDB RAG      │           │  SQLite Database   │
-         │   Vector Store      │           │   Relational DB    │
-         ├─────────────────────┤           ├────────────────────┤
-         │ • 10 Policy Docs    │           │ • Customers Table  │
-         │ • 38 Chunks         │           │ • Policies Table   │
-         │ • MiniLM Embeddings │           │ • Claims Table     │
-         │ • Semantic Search   │           │ • History Tracking │
-         └─────────────────────┘           └────────────────────┘
+┌────────────────────────────────────────────────────────────────────┐
+│                     Gradio Chat Interface (UI)                     │
+│                   http://localhost:7865 (Local)                    │
+│         https://huggingface.co/spaces/abhireds/claimflow-ai       │
+└──────────────────────────┬─────────────────────────────────────────┘
+                           │ HumanMessage
+                           ▼
+┌────────────────────────────────────────────────────────────────────┐
+│            LangGraph StateGraph Workflow (GPT-4o)                  │
+│                                                                    │
+│  ═══════════════════════════════════════════════════════════════  │
+│  📍 PHASE 1: DETERMINISTIC CONVERSATIONAL INTAKE                  │
+│  ═══════════════════════════════════════════════════════════════  │
+│                                                                    │
+│      ┌──────────┐         ┌─────────────────┐                    │
+│  ┌──→│  Intake  │────────→│ Completeness?   │                    │
+│  │   │   Node   │         │  Check (Edge)   │                    │
+│  │   └──────────┘         └────────┬────────┘                    │
+│  │                                 │                              │
+│  │                        ┌────────┴───────┐                     │
+│  │                        │                │                      │
+│  │                  [continue]        [process]                   │
+│  │                        │                │                      │
+│  │                        ▼                │                      │
+│  │               ┌────────────────┐        │                      │
+│  └───────────────│ Ask Question   │        │                      │
+│      (loop)      │     Node       │        │                      │
+│                  └────────────────┘        │                      │
+│                         │                  │                      │
+│                    [END - wait]            │                      │
+│                                            │                      │
+│  ═══════════════════════════════════════════════════════════════  │
+│  🤖 PHASE 2: AGENTIC TOOL-BASED PROCESSING (ReAct Loop)          │
+│  ═══════════════════════════════════════════════════════════════  │
+│                                            │                      │
+│                                            ▼                      │
+│                                   ┌────────────────┐             │
+│                                   │  Transition    │             │
+│                                   │     Node       │             │
+│                                   └────────┬───────┘             │
+│                                            │                      │
+│                                            ▼                      │
+│                      ┌──────────────────────────────────┐        │
+│                      │       Agent Node (LLM)           │        │
+│                      │  • Analyzes state                │        │
+│                      │  • Selects tools to call         │        │
+│                      │  • Generates tool arguments      │        │
+│                      └───────┬──────────────────────────┘        │
+│                              │                                    │
+│                     ┌────────┴────────┐                          │
+│                     │                 │                           │
+│              [call tools]      [finalize]                         │
+│                     │                 │                           │
+│                     ▼                 ▼                           │
+│            ┌─────────────────┐  ┌──────────────┐                │
+│            │ Tool Executor   │  │   Finalize   │                │
+│       ┌────│  (9 Tools)      │  │     Node     │                │
+│       │    └────────┬────────┘  └──────┬───────┘                │
+│       │             │                   │                         │
+│       └─────────────┘                   ▼                         │
+│         (loop back)                   [END]                       │
+│                                                                    │
+└────────────────────────────────────────────────────────────────────┘
+             │                              │
+             │ (Tools call databases)       │
+             ▼                              ▼
+  ┌─────────────────────┐      ┌──────────────────────────┐
+  │  ChromaDB (RAG)     │      │  SQLite + SQLAlchemy     │
+  │  Vector Database    │      │  Relational Database     │
+  ├─────────────────────┤      ├──────────────────────────┤
+  │ • 10 Policy Docs    │      │ • Customers (3 rows)     │
+  │ • 38 Chunks         │      │ • Policies (5 rows)      │
+  │ • MiniLM-L6-v2      │      │ • Claims (history)       │
+  │ • Persistent Store  │      │ • Relationships (FKs)    │
+  │ • Semantic Search   │      │ • Enums & Validations    │
+  └─────────────────────┘      └──────────────────────────┘
 ```
 
 **Tech Stack:**  
-`LangGraph 1.0+` • `GPT-4o` • `ChromaDB` • `SQLAlchemy` • `Gradio 6.5` • `Pytest` • `Docker`
+`LangGraph 2.0+` • `LangChain 0.3+` • `GPT-4o` • `ChromaDB 0.4+` • `SQLAlchemy 2.0` • `sentence-transformers` • `Gradio 6.5` • `Pytest` • `Docker`
 
 ---
 
-## 🔄 The 9-Step Agentic Workflow
+## � The 9 Agentic Tools
 
-ClaimFlow's AI agent autonomously executes these steps **without human intervention**:
+ClaimFlow's agent has access to **9 specialized tools** (LangChain `@tool` decorator) that it intelligently orchestrates:
 
-| Step | Agent Action | Intelligence Applied |
-|------|--------------|---------------------|
-| **1️⃣ Data Extraction** | Parse conversation into structured claim data | NLP + Entity Recognition |
-| **2️⃣ Policy Retrieval** | Semantic search through policy documents | RAG + Vector Similarity |
-| **3️⃣ Coverage Check** | Verify claim type matches policy coverage | Rule-Based Logic |
-| **4️⃣ Exclusion Check** | Identify any policy exclusions | Pattern Matching |
-| **5️⃣ Amount Calculation** | Apply deductibles, depreciation, co-pay | Mathematical Computation |
-| **6️⃣ Document Verification** | List required supporting documents | Conditional Logic |
-| **7️⃣ History Analysis** | Check past claims for fraud patterns | Database Query + ML |
-| **8️⃣ Decision Making** | Approve/Reject/Review based on rules | Multi-Factor Analysis |
-| **9️⃣ Report Generation** | Create comprehensive claim report | Structured Output |
+| Tool | Function | Dependencies | Data Source |
+|------|----------|--------------|-------------|
+| **1️⃣ extract_claim_data** | Normalize & structure conversation data | None (runs first) | Conversation state |
+| **2️⃣ retrieve_policy** | Fetch policy details by identifier | None (parallel) | SQLite → ChromaDB RAG |
+| **3️⃣ check_coverage** | Verify claim type is covered | `retrieve_policy` | RAG API + Rules |
+| **4️⃣ check_exclusions** | Check policy exclusions apply | `extract_claim_data` + `retrieve_policy` | JSON rules |
+| **5️⃣ calculate_payout** | Compute payable amount | `check_coverage` | Depreciation rules |
+| **6️⃣ verify_documents** | List required documents | `extract_claim_data` | document_rules.json |
+| **7️⃣ check_claim_history** | Review past claims & fraud | None (parallel) | SQLite database |
+| **8️⃣ make_decision** | Approve/Deny/Review decision | ALL tools 1-7 | business_rules.json |
+| **9️⃣ generate_report** | Create comprehensive report | `make_decision` (last) | All previous results |
 
-**Each step is autonomous** - the AI agent decides what to do, retrieves information, makes decisions, and proceeds to the next step without human oversight.
+### Tool Execution Flow
+
+```mermaid
+graph TD
+    A[Agent Starts] --> B{Analyze State}
+    B --> C[Select Tools]
+    C --> D[Parallel Execution]
+    D --> E1[extract_claim_data]
+    D --> E2[retrieve_policy]
+    D --> E3[check_claim_history]
+    E1 --> F[check_coverage]
+    E2 --> F
+    F --> G[Parallel Execution]
+    G --> G1[check_exclusions]
+    G --> G2[calculate_payout]
+    G --> G3[verify_documents]
+    G1 --> H[make_decision]
+    G2 --> H
+    G3 --> H
+    E3 --> H
+    H --> I[generate_report]
+    I --> J[Finalize]
+```
+
+**Key Features:**
+- 🔄 **Dependency Validation** - Tools check prerequisites before execution
+- ⚡ **Parallel Execution** - Independent tools run concurrently
+- 📊 **Audit Trail** - Each tool logs execution time and results
+- 🛡️ **Error Handling** - Graceful fallbacks when DB/RAG unavailable
+- 🎯 **Agent Decision** - LLM decides which tools to call and in what order
 
 ---
 
@@ -270,11 +338,13 @@ PORT=7865
 ```
 claimflow-ai-agent/
 ├── agent/                    # 🤖 Agentic AI Core
-│   ├── workflow.py          # LangGraph multi-phase workflow
-│   ├── tools.py             # 9-step processing tools
+│   ├── workflow_agent.py    # Hybrid LangGraph workflow (RECOMMENDED)
+│   ├── workflow.py          # Linear pipeline workflow (alternative)
+│   ├── tools_agent.py       # 9 tools with @tool decorator
+│   ├── tools.py             # Legacy tool implementations
 │   ├── prompts.py           # LLM prompt engineering
-│   ├── rag.py               # Vector store RAG integration
-│   └── state.py             # State management schema
+│   ├── rag.py               # ChromaDB vector store & RAG
+│   └── state.py             # TypedDict state schema + audit models
 ├── database/                 # 🗄️ Data Layer
 │   ├── models.py            # SQLAlchemy ORM models
 │   └── crud.py              # CRUD operations
@@ -349,8 +419,16 @@ INSURANCE_RAG_URL=http://localhost:8000
 
 **Model Settings (`config.py`):**
 ```python
+# Conversation LLM (creative for dialogue)
 MODEL_NAME = "gpt-4o"
-MODEL_TEMPERATURE = 0.7
+MODEL_TEMPERATURE = 0.7  # Conversation
+
+# Agent LLM (deterministic for processing)
+# temperature=0.1 + tools bound
+
+# Databases
+DATABASE_URL = "sqlite:///data/claimflow.db"
+CHROMA_DB_PATH = "data/chroma_db"
 ```
 
 ---
@@ -379,7 +457,9 @@ MIT License - See [LICENSE](LICENSE) file
 - 🌐 GitHub: [@AbhishyantReds](https://github.com/AbhishyantReds)
 - 🤗 Hugging Face: [@abhireds](https://huggingface.co/abhireds)
 - 📧 Project: ClaimFlow AI Agent
-- 🛠️ Built with: LangGraph • GPT-4o • ChromaDB • Python
+- 🛠️ Built with: LangGraph 2.0 • LangChain 0.3 • GPT-4o • ChromaDB • SQLAlchemy 2.0
+- 🏗️ Architecture: Hybrid Two-Phase (Deterministic + Agentic)
+- 🔧 Tools: 9 Specialized LangChain Tools with Dependencies
 - 📅 Date: February 2026
 
 ---
